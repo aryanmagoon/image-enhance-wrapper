@@ -4,8 +4,6 @@ import flask
 from PIL import Image
 import io
 import numpy
-import cv2
-import StringIO
 
 
 upscale=EnhanceAgent(
@@ -15,8 +13,8 @@ upscale=EnhanceAgent(
     tile=0,
 )
 
-@app.route("/enhance", methods=["POST"])
-def enhance():
+@app.route("/upsample", methods=["POST"])
+def upsample():
     if flask.request.method =="POST":
         if flask.request.files.get("image"):
             image=Image.open(io.BytesIO(flask.request.files("image").read()))
