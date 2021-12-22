@@ -3,17 +3,21 @@ from basicsr.archs.rrdbnet_arch import RRDBNet
 import flask
 from PIL import Image
 import io
+<<<<<<< HEAD
 import numpy as np
 import cv2
 from tempfile import NamedTemporaryFile
 import json
+=======
+import numpy
+>>>>>>> ea4e20028dfbb294033df1c1d1d3bb141c65967a
 
 
 app=flask.Flask(__name__)
 
 
-@app.route("/enhance", methods=["POST"])
-def enhance():
+@app.route("/upsample", methods=["POST"])
+def upsample():
     if flask.request.method =="POST":
         if flask.request.files.get("image"):
             image=Image.open(io.BytesIO(flask.request.files["image"].read()))
