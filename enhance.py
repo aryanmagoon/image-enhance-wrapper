@@ -3,14 +3,9 @@ from basicsr.archs.rrdbnet_arch import RRDBNet
 import flask
 from PIL import Image
 import io
-<<<<<<< HEAD
 import numpy as np
 import cv2
-from tempfile import NamedTemporaryFile
 import json
-=======
-import numpy
->>>>>>> ea4e20028dfbb294033df1c1d1d3bb141c65967a
 
 
 app=flask.Flask(__name__)
