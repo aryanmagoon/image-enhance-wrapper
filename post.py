@@ -2,12 +2,12 @@ import requests
 import numpy as np
 import matplotlib.pyplot as plt
 import json
+from PIL import Image
 
 files={'image': open('download.png', 'rb')}
-url='http://172.17.0.2:5000/upsample'
+url='http://localhost:5000/upsample'
 print('request sent')
 r=requests.post(url, files=files)
 y=np.array(json.loads(r.text))
-print('got requests')
-plt.imshow(y)
-plt.show
+im = Image.fromarray((y * 255).astype(np.uint8))
+im.show()
