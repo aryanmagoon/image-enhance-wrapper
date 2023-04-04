@@ -5,7 +5,6 @@ import torch
 from torch.nn import functional
 import os
 from PIL import Image
-from basicsr.archs.rrdbnet_arch import RRDBNet
 class EnhanceAgent():
   def __init__(self, scale, model_path,  model=None, tile=0, tile_pad=10, pre_pad=10, half=False):
     self.scale=scale
