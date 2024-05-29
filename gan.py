@@ -1,10 +1,7 @@
 import cv2
-import math
 import numpy as np
 import torch
 from torch.nn import functional
-import os
-from PIL import Image
 class EnhanceAgent():
   def __init__(self, scale, model_path,  model=None, tile=0, tile_pad=10, pre_pad=10, half=False):
     self.scale=scale
@@ -15,11 +12,14 @@ class EnhanceAgent():
     self.mod_scale=None
 
     self.device=torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(self.device)
     loadnet=torch.load('ImageEnhance.pth', map_location=torch.device('cpu'))
     if 'params_ema' in loadnet:
       keyname='params_ema'
+      print('ema')
     else:
       keyname='params'
+      print('reg')
     model.load_state_dict(loadnet[keyname], strict=True)
     model.eval()
     self.model= model.to(self.device)

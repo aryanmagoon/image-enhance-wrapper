@@ -3,10 +3,7 @@ from torch import nn as nn
 from torch.nn import functional as F
 from torch.nn import init as init
 from torch.nn.modules.batchnorm import _BatchNorm
-import warnings
-import torchvision
-import math
-import collections.abc
+
 
 @torch.no_grad()
 def default_init_weights(module_list, scale=1, bias_fill=0, **kwargs):
@@ -35,7 +32,6 @@ def make_layer(basic_block, num_basic_block, **kwarg):
         layers.append(basic_block(**kwarg))
     return nn.Sequential(*layers)
 
-# may write a cpp file
 def pixel_unshuffle(x, scale):
     b, c, hh, hw = x.size()
     out_channel = c * (scale**2)
@@ -49,12 +45,6 @@ def pixel_unshuffle(x, scale):
 
 
 class ResidualDenseBlock(nn.Module):
-    """Residual Dense Block.
-    Used in RRDB block in ESRGAN.
-    Args:
-        num_feat (int): Channel number of intermediate features.
-        num_grow_ch (int): Channels for each growth.
-    """
 
     def __init__(self, num_feat=64, num_grow_ch=32):
         super(ResidualDenseBlock, self).__init__()
@@ -75,17 +65,10 @@ class ResidualDenseBlock(nn.Module):
         x3 = self.lrelu(self.conv3(torch.cat((x, x1, x2), 1)))
         x4 = self.lrelu(self.conv4(torch.cat((x, x1, x2, x3), 1)))
         x5 = self.conv5(torch.cat((x, x1, x2, x3, x4), 1))
-        # Empirically, we use 0.2 to scale the residual for better performance
         return x5 * 0.2 + x
 
 
 class RRDB(nn.Module):
-    """Residual in Residual Dense Block.
-    Used in RRDB-Net in ESRGAN.
-    Args:
-        num_feat (int): Channel number of intermediate features.
-        num_grow_ch (int): Channels for each growth.
-    """
 
     def __init__(self, num_feat, num_grow_ch=32):
         super(RRDB, self).__init__()
@@ -97,26 +80,10 @@ class RRDB(nn.Module):
         out = self.rdb1(x)
         out = self.rdb2(out)
         out = self.rdb3(out)
-        # Empirically, we use 0.2 to scale the residual for better performance
         return out * 0.2 + x
 
 
 class RRDBNet(nn.Module):
-    """Networks consisting of Residual in Residual Dense Block, which is used
-    in ESRGAN.
-    ESRGAN: Enhanced Super-Resolution Generative Adversarial Networks.
-    We extend ESRGAN for scale x2 and scale x1.
-    Note: This is one option for scale 1, scale 2 in RRDBNet.
-    We first employ the pixel-unshuffle (an inverse operation of pixelshuffle to reduce the spatial size
-    and enlarge the channel size before feeding inputs into the main ESRGAN architecture.
-    Args:
-        num_in_ch (int): Channel number of inputs.
-        num_out_ch (int): Channel number of outputs.
-        num_feat (int): Channel number of intermediate features.
-            Default: 64
-        num_block (int): Block number in the trunk network. Defaults: 23
-        num_grow_ch (int): Channels for each growth. Default: 32.
-    """
 
     def __init__(self, num_in_ch, num_out_ch, scale=4, num_feat=64, num_block=23, num_grow_ch=32):
         super(RRDBNet, self).__init__()
@@ -135,7 +102,7 @@ class RRDBNet(nn.Module):
         self.conv_last = nn.Conv2d(num_feat, num_out_ch, 3, 1, 1)
 
         self.lrelu = nn.LeakyReLU(negative_slope=0.2, inplace=True)
-
+    
     def forward(self, x):
         if self.scale == 2:
             feat = pixel_unshuffle(x, scale=2)
@@ -146,7 +113,6 @@ class RRDBNet(nn.Module):
         feat = self.conv_first(feat)
         body_feat = self.conv_body(self.body(feat))
         feat = feat + body_feat
-        # upsample
         feat = self.lrelu(self.conv_up1(F.interpolate(feat, scale_factor=2, mode='nearest')))
         feat = self.lrelu(self.conv_up2(F.interpolate(feat, scale_factor=2, mode='nearest')))
         out = self.conv_last(self.lrelu(self.conv_hr(feat)))

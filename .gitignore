@@ -1,3 +1,14 @@
 .venv
 *.png
 *.pyc
+.venv2
+.venv3
+new-env
+tutorial-env
+simpweb.py
+test_jax.py
+test.py
+test_input.py
+requirements.txt
+init_weights.pickle
+easy.py
